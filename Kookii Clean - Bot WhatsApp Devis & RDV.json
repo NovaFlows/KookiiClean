@@ -1,0 +1,3537 @@
+{
+  "name": "Kookii Clean - Bot WhatsApp Devis & RDV - v2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kookii-whatsapp",
+        "options": {}
+      },
+      "id": "5020b5f4-354c-447d-b6c9-b16afbb23e83",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -3520,
+        1216
+      ],
+      "webhookId": "kooki-wa-messages"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: {\n  chatId:       $json.chatId,\n  firstName:    $json.firstName,\n  fileId:       $json.fileId,\n  caption:      $json.caption,\n  telegramToken: 'whatsapp_no_token_needed'\n} }];"
+      },
+      "id": "57b02773-2e58-418e-8ab3-3beb275fbed2",
+      "name": "Lire Token StaticData",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v18.0/1115373868318220/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAAWKVrzCZC2sBRA8rg9HHOvZCD2kCX4LZBBgiZC69zaslZAuIp3RWb1a63wCJPW5364ABkFuzQZBm1ykrcQCb27TIVBkSNcXENlyZCnnhGgutrp1x2xIoSooZAeKWVzq3c6LILkn3xC1QBWPGAHcyMdTg1yZALtbDVIiJ3QohMl0oR3wXVX1kZCOjsgXFLMgP3C1Vm4q2m9XCUVZC50ohmZC9WGZCk53VLkb5IaGALSvl2l9LjuScaX43JwxWTX1Oo7BqArMgTU7cAFqtgAUxZAsCh7qd39eZAdrCcmzc4lmfwIZCwZDZD"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({messaging_product:'whatsapp',to:$json.chatId,type:'text',text:{body:$json.output}}) }}",
+        "options": {}
+      },
+      "id": "2171cc7d-8c08-4bad-9e2f-3db2e6abf9e0",
+      "name": "Envoyer Analyse Photo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        752,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "p1",
+              "name": "chatId",
+              "value": "={{ $json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "p2",
+              "name": "firstName",
+              "value": "={{ $json.body.data.pushName || 'Client' }}",
+              "type": "string"
+            },
+            {
+              "id": "p3",
+              "name": "fileId",
+              "value": "={{ $json.body.data.message?.imageMessage?.url || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "p4",
+              "name": "caption",
+              "value": "={{ $json.body.data.message?.imageMessage?.caption || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "62abae56-44c0-4b4e-b065-decc18c0ca33",
+      "name": "Extraire Données Photo",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1056,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "is_image",
+              "leftValue": "={{ $json.body.data.message?.imageMessage != null }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7c61290b-b06b-46b7-9536-60e2747a8e1f",
+      "name": "Photo ou Texte?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1952,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1sOX6R1M2KRNVCiuqUIFai7qTiiF2pTnXSqoD0sJELN0",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Formules",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "07e47039-ba1d-4044-bcf0-cf979d4cbf3d",
+      "name": "Lire Formules",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1504,
+        192
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TzF9IqEI1y0nwsIB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v18.0/1115373868318220/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAAWKVrzCZC2sBRA8rg9HHOvZCD2kCX4LZBBgiZC69zaslZAuIp3RWb1a63wCJPW5364ABkFuzQZBm1ykrcQCb27TIVBkSNcXENlyZCnnhGgutrp1x2xIoSooZAeKWVzq3c6LILkn3xC1QBWPGAHcyMdTg1yZALtbDVIiJ3QohMl0oR3wXVX1kZCOjsgXFLMgP3C1Vm4q2m9XCUVZC50ohmZC9WGZCk53VLkb5IaGALSvl2l9LjuScaX43JwxWTX1Oo7BqArMgTU7cAFqtgAUxZAsCh7qd39eZAdrCcmzc4lmfwIZCwZDZD"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({messaging_product:'whatsapp',to:$('Préparer Annulation RDV').first().json.chatId,type:'text',text:{body:'❌ Votre rendez-vous a bien été annul����������� et supprimé du planning.\\n\\nN\\'hésitez pas à reprendre rendez-vous quand vous voulez ! 🚗✨'}}) }}",
+        "options": {}
+      },
+      "id": "41ce4efc-d6bb-4dfd-b3b9-deaa4f7d8516",
+      "name": "Confirmer Annulation RDV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3296,
+        3168
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list"
+        },
+        "eventId": "={{ $json.eventId }}",
+        "options": {}
+      },
+      "id": "47a34230-a806-47b9-8e66-9c9b41d9259a",
+      "name": "Supprimer RDV Calendar",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -3520,
+        3168
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "h0JBzDodIfM1PB8r",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const callbackData = $json.callbackData;\nconst match = callbackData.match(/^CANCEL_(.+)_(\\d+)$/);\nif (!match) throw new Error('Format callback invalide: ' + callbackData);\nconst eventId = match[1];\nconst chatId = match[2];\nreturn [{ json: {\n  eventId,\n  chatId,\n  callbackQueryId: $json.callbackQueryId,\n  firstName: $json.firstName\n}}];"
+      },
+      "id": "6cbbb152-41f1-4f6f-8b4d-31001d21bce9",
+      "name": "Préparer Annulation RDV",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        1696
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "is_cancel_event",
+              "leftValue": "={{ $json.callbackData.startsWith('CANCEL_') }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4a3a662b-b384-43b1-b2bf-7f21c3ca4b73",
+      "name": "Annuler un RDV?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        1600
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "no_conflict",
+              "leftValue": "={{ $json.hasConflict }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c4f94aaf-c687-498e-833d-871eb7c12d1b",
+      "name": "Conflit Immédiat?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        752,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst items = response.items || [];\nconst prep = $('Préparer Vérif Immédiate').first().json;\nconst bookingStart = new Date(prep.startDate).getTime();\nconst bookingEnd = new Date(prep.endDate).getTime();\n\nconst hasConflict = items.some(ev => {\n  if (!ev.id) return false;\n  if (!ev.start?.dateTime) return false;\n  const evStart = new Date(ev.start.dateTime).getTime();\n  const evEnd = new Date(ev.end.dateTime).getTime();\n  return evStart < bookingEnd && evEnd > bookingStart;\n});\n\nreturn [{ json: { chatId: prep.chatId, startDate: prep.startDate, endDate: prep.endDate, booking: prep.booking, hasConflict } }];"
+      },
+      "id": "9d9b308b-c41a-4eca-88e7-fd5344849738",
+      "name": "Analyser Dispo Immédiate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleCalendarOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "timeMin",
+              "value": "={{ $json.startDate }}"
+            },
+            {
+              "name": "timeMax",
+              "value": "={{ $json.endDate }}"
+            },
+            {
+              "name": "singleEvents",
+              "value": "true"
+            },
+            {
+              "name": "maxResults",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c514321e-61bd-449c-9fd7-dfac6dcb6c87",
+      "name": "Vérif Dispo Immédiate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        304,
+        96
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "h0JBzDodIfM1PB8r",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = $input.first().json.chatId;\nconst staticData = $getWorkflowStaticData('global');\nconst booking = staticData['booking_' + chatId];\nif (!booking) throw new Error('Booking introuvable pour ' + chatId);\n\nconst durations = { eco: 45, standard: 75, premium: 120 };\nconst duration = durations[booking.formule] || 60;\n\nconst [h, m] = booking.heure.split(':').map(Number);\nconst endMinutes = h * 60 + m + duration;\nconst endH = String(Math.floor(endMinutes / 60)).padStart(2, '0');\nconst endM = String(endMinutes % 60).padStart(2, '0');\n\nfunction frenchOffset(dateStr) {\n  const year = parseInt(dateStr.slice(0, 4));\n  const mar = new Date(Date.UTC(year, 2, 31));\n  mar.setUTCDate(31 - mar.getUTCDay());\n  const oct = new Date(Date.UTC(year, 9, 31));\n  oct.setUTCDate(31 - oct.getUTCDay());\n  const d = new Date(dateStr + 'T00:00:00Z');\n  return (d >= mar && d < oct) ? '+02:00' : '+01:00';\n}\n\nconst offset = frenchOffset(booking.date);\nconst startDate = booking.date + 'T' + booking.heure + ':00' + offset;\nconst endDate = booking.date + 'T' + endH + ':' + endM + ':00' + offset;\n\nreturn [{ json: { chatId, startDate, endDate, booking } }];"
+      },
+      "id": "83f82fac-7f90-47c9-ab5b-e31223d92066",
+      "name": "Préparer Vérif Immédiate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst chatId = data.chatId;\nconst booking = data.booking;\nconst bookedDate = booking.date;\nconst bookedTime = booking.heure;\n\nconst dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];\nconst monthNames = ['janvier', 'f\\u00e9vrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'ao\\u00fbt', 'septembre', 'octobre', 'novembre', 'd\\u00e9cembre'];\n\n// R\\u00e9cup\\u00e9rer les cr\\u00e9neaux pris depuis le cache static\nconst staticData = $getWorkflowStaticData('global');\nconst bookedSlots = staticData['bookedSlotsCache'] || [];\n\nconst durations = { eco: 45, standard: 75, premium: 120 };\nconst duration = durations[booking.formule] || 60;\nconst [bookedH, bookedM] = bookedTime.split(':').map(Number);\n\nfunction isSlotTaken(date, startH, startM, durationMin) {\n  const slotStart = startH * 60 + startM;\n  const slotEnd = slotStart + durationMin;\n  return bookedSlots.some(bs => {\n    if (bs.date !== date) return false;\n    const bsStart = bs.startH * 60 + bs.startM;\n    const bsEnd = bs.endH * 60 + bs.endM;\n    return slotStart < bsEnd && slotEnd > bsStart;\n  });\n}\n\n// Trouver les 3 prochains cr\\u00e9neaux libres (jusqu'\\u00e0 10 jours)\nconst alternatives = [];\nconst baseDate = new Date(bookedDate + 'T12:00:00Z');\nlet offset = 1;\nwhile (alternatives.length < 3 && offset <= 10) {\n  const next = new Date(baseDate);\n  next.setUTCDate(baseDate.getUTCDate() + offset);\n  const nextDate = `${next.getUTCFullYear()}-${String(next.getUTCMonth()+1).padStart(2,'0')}-${String(next.getUTCDate()).padStart(2,'0')}`;\n  if (!isSlotTaken(nextDate, bookedH, bookedM, duration)) {\n    const dayName = dayNames[next.getUTCDay()];\n    const day = String(next.getUTCDate()).padStart(2, '0');\n    const month = next.getUTCMonth();\n    const year = next.getUTCFullYear();\n    alternatives.push(`\\u2022 ${dayName} ${day} ${monthNames[month]} \\u00e0 ${bookedTime}`);\n  }\n  offset++;\n}\n\nconst altText = alternatives.length > 0\n  ? alternatives.join('\\n')\n  : '\\u2022 Contactez-nous pour trouver un cr\\u00e9neau disponible';\n\nconst message = `\\u274c Ce cr\\u00e9neau (${bookedDate} \\u00e0 ${bookedTime}) est d\\u00e9j\\u00e0 r\\u00e9serv\\u00e9 !\\n\\nVoici des alternatives disponibles :\\n${altText}\\n\\nR\\u00e9pondez avec votre choix ou proposez une autre date/heure \\ud83d\\ude4f`;\n\n// On sauvegarde les infos actuelles dans le cache global avant de sortir\n// pour que l'IA puisse les retrouver au prochain message du client\nstaticData['pending_booking_' + chatId] = booking;\n\nreturn [{ \n  json: { \n    chatId, \n    message, \n    booking,\n    // On ajoute un rappel pour le debug ou le prompt\n    context_reminder: `Client: ${booking.client}, Véhicule: ${booking.vehicule}, Formule: ${booking.formule}, Adresse: ${booking.adresse}`\n  } \n}];"
+      },
+      "id": "f13cf78e-7bd7-42f9-8cb9-d412e265e355",
+      "name": "Gérer Conflit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleCalendarOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "timeMin",
+              "value": "={{ new Date().toISOString() }}"
+            },
+            {
+              "name": "timeMax",
+              "value": "={{ new Date(Date.now() + 15 * 24 * 3600 * 1000).toISOString() }}"
+            },
+            {
+              "name": "singleEvents",
+              "value": "true"
+            },
+            {
+              "name": "maxResults",
+              "value": "50"
+            },
+            {
+              "name": "orderBy",
+              "value": "startTime"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3af88847-5673-4cd9-9a0b-69e906bd6958",
+      "name": "Récupérer Agenda",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1280,
+        192
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "h0JBzDodIfM1PB8r",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleCalendarOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "timeMin",
+              "value": "={{ $json.startDate }}"
+            },
+            {
+              "name": "timeMax",
+              "value": "={{ $json.endDate }}"
+            },
+            {
+              "name": "singleEvents",
+              "value": "true"
+            },
+            {
+              "name": "maxResults",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d9220ed8-6e54-4be1-982c-7ce8710c9eca",
+      "name": "Verifier Dispo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -144,
+        1888
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "h0JBzDodIfM1PB8r",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\nJSON.stringify({\n  \"number\": $json.chatId,\n  \"text\": $json.message,\n  \"options\": {\n    \"delay\": 1200,\n    \"presence\": \"composing\"\n  }\n})\n}}",
+        "options": {}
+      },
+      "id": "fe6969b3-7a65-4770-a343-f522b6033971",
+      "name": "Creneau Deja Pris",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cok1",
+              "leftValue": "={{ $json.hasConflict }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ac7696a4-5175-4079-b4e4-e9f7fbe21e1d",
+      "name": "Creneau OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        304,
+        1888
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst items = response.items || [];\nconst booking = $('Récupérer Booking + Préparer Cal').first().json;\nconst bookingStart = new Date(booking.startDate).getTime();\nconst bookingEnd = new Date(booking.endDate).getTime();\n\n// Ignorer les événements all-day (start.date sans heure) - anniversaires, rappels, etc.\n// Seuls les événements avec start.dateTime peuvent créer un conflit\nconst hasConflict = items.some(ev => {\n  if (!ev.id) return false;\n  if (!ev.start?.dateTime) return false; // skip all-day events\n  const evStart = new Date(ev.start.dateTime).getTime();\n  const evEnd = new Date(ev.end.dateTime).getTime();\n  return evStart < bookingEnd && evEnd > bookingStart;\n});\n\nreturn [{ json: { ...booking, hasConflict } }];"
+      },
+      "id": "8d76d300-e233-4673-8468-c91aa576b65f",
+      "name": "Analyser Dispo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        1888
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const calResponse = $input.first().json;\nconst source = $('Extraire Données Message').first().json;\nconst events = calResponse.items || [];\nconst staticData = $getWorkflowStaticData('global');\n\n// --- RÉCUPÉRATION DU BOOKING EN ATTENTE ---\nconst pendingBooking = staticData['pending_booking_' + source.chatId];\nlet bookingContext = \"\";\n\nif (pendingBooking) {\n  bookingContext = `\\n[INFOS_DÉJÀ_COLLECTÉES]\\n` +\n    `- Client: ${pendingBooking.client}\\n` +\n    `- Véhicule: ${pendingBooking.vehicule}\\n` +\n    `- Formule: ${pendingBooking.formule}\\n` +\n    `- Adresse: ${pendingBooking.adresse}\\n` +\n    `- Téléphone: ${pendingBooking.telephone}\\n` +\n    `L'utilisateur a déjà fourni ces informations. NE LES REDEMANDE PAS. Il doit juste valider une nouvelle date.\\n`;\n}\n\n\n// Lire les formules depuis Google Sheets\nlet formulesContext = '';\ntry {\n  const formulesRows = $('Lire Formules').all();\n  if (formulesRows && formulesRows.length > 0) {\n    const firstRow = formulesRows[0].json;\n    const headers = Object.keys(firstRow);\n    formulesContext += headers.join(' | ') + '\\n';\n    formulesContext += headers.map(() => '---').join(' | ') + '\\n';\n    formulesRows.forEach(item => {\n      const row = item.json;\n      formulesContext += headers.map(h => String(row[h] !== undefined ? row[h] : '')).join(' | ') + '\\n';\n    });\n  }\n} catch(e) {\n  formulesContext = '';\n}\n\nconst dayNames = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];\n\nfunction toParisLocal(isoStr) {\n  const d = new Date(isoStr);\n  const year = d.getUTCFullYear();\n  const mar = new Date(Date.UTC(year, 2, 31));\n  mar.setUTCDate(31 - mar.getUTCDay());\n  const oct = new Date(Date.UTC(year, 9, 31));\n  oct.setUTCDate(31 - oct.getUTCDay());\n  const offsetMs = (d >= mar && d < oct) ? 2 * 3600000 : 3600000;\n  return new Date(d.getTime() + offsetMs);\n}\n\nconst timedEvents = events.filter(ev => ev.start && ev.start.dateTime);\nconst bookedSlotsData = timedEvents.map(ev => {\n  const start = toParisLocal(ev.start.dateTime);\n  const end = toParisLocal(ev.end.dateTime);\n  return {\n    date: `${start.getUTCFullYear()}-${String(start.getUTCMonth()+1).padStart(2,'0')}-${String(start.getUTCDate()).padStart(2,'0')}`,\n    startH: start.getUTCHours(), startM: start.getUTCMinutes(),\n    endH: end.getUTCHours(), endM: end.getUTCMinutes()\n  };\n});\n\nstaticData['bookedSlotsCache'] = bookedSlotsData;\n\nlet calendarLines = [];\nconst now = new Date();\nfor (let i = 0; i <= 14; i++) {\n  const d = new Date(now);\n  d.setDate(now.getDate() + i);\n  const dayName = dayNames[d.getDay()];\n  const day = String(d.getDate()).padStart(2, '0');\n  const month = String(d.getMonth() + 1).padStart(2, '0');\n  const year = d.getFullYear();\n  const iso = `${year}-${month}-${day}`;\n  const label = i === 0 ? \" (aujourd'hui)\" : i === 1 ? \" (demain)\" : \"\";\n  calendarLines.push(`${dayName} ${day}/${month}/${year} -> ${iso}${label}`);\n}\n\n// Créneaux urgence\nconst URGENCE_SEUIL_JOURS = 6;\nlet urgencyLines = [];\nfor (let i = 0; i <= URGENCE_SEUIL_JOURS; i++) {\n  const d = new Date(now);\n  d.setDate(now.getDate() + i);\n  if (d.getDay() === 6) {\n    const day = String(d.getDate()).padStart(2, '0');\n    const month = String(d.getMonth() + 1).padStart(2, '0');\n    const year = d.getFullYear();\n    const iso = `${year}-${month}-${day}`;\n    urgencyLines.push(`${iso} 14:00 | URGENCE +50% | Créneau très demandé, délai < 48h`);\n  }\n}\nconst urgencyContext = urgencyLines.join('\\n');\n\n// État véhicule analysé par photo (si disponible)\nconst storedEtat = staticData['etat_vehicule_' + source.chatId];\nlet etatPhotoContext = '';\nif (storedEtat) {\n  etatPhotoContext = `${storedEtat.etat}${storedEtat.justification ? ' — ' + storedEtat.justification : ''}`;\n}\n\nreturn [{ json: { ...source, calendarContext: calendarLines.join('\\n'), formulesContext, urgencyContext, etatPhotoContext,bookingContext } }];"
+      },
+      "id": "fbf362b5-4fc9-4a86-a3c3-486c3434aa6b",
+      "name": "Préparer Contexte Dates",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"number\": $node[\"Préparer Suppression\"].json[\"chatId\"],\n  \"text\": \"❌ Votre rendez-vous a bien été annulé et supprimé du planning.\\n\\nN'hésitez pas à nous recontacter pour un nouveau rendez-vous ! 🚗✨\"\n}\n}}",
+        "options": {}
+      },
+      "id": "1a5482c6-b342-4531-a57c-2abedfeb5eed",
+      "name": "Confirmer Annulation Calendrier",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1424,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list"
+        },
+        "eventId": "={{ $json.eventId }}",
+        "options": {}
+      },
+      "id": "b678da43-c767-4e0f-9561-6754563db832",
+      "name": "Supprimer Événement Calendrier",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1200,
+        736
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "h0JBzDodIfM1PB8r",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId  = $('Détecter et Stocker RDV').first().json.chatId;\nconst devisNum = $('Détecter et Stocker RDV').first().json.devisNum || '';\nconst staticData = $getWorkflowStaticData('global');\n\nconst calItems = $input.first().json.items || [];\nconst event = calItems.find(e => (e.summary || '').includes(devisNum));\nconst eventId = event?.id || staticData['cal_event_' + chatId];\n\nif (!eventId) throw new Error('Aucun événement calendrier trouvé pour ' + devisNum);\n\ndelete staticData['cal_event_' + chatId];\nreturn [{ json: { chatId, eventId } }];"
+      },
+      "id": "febf5375-4649-4726-8ccf-91ccdae33c59",
+      "name": "Préparer Suppression",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "is_cancel",
+              "leftValue": "={{ $('Détecter et Stocker RDV').first().json.isCancelRequest }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "cfaf23ce-86c8-4e76-9dd1-42b21a288218",
+      "name": "Annulation Demandée?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        528,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const calEvent   = $input.first().json;\nconst chatId     = $('Récupérer Booking + Préparer Cal').first().json.chatId;\nconst booking    = $('Récupérer Booking + Préparer Cal').first().json.booking;\nconst staticData = $getWorkflowStaticData('global');\n\nstaticData['cal_event_' + chatId] = calEvent.id;\ndelete staticData['awaitingDevisConfirmation_' + chatId];\n\nconst msgText = '✅ *Votre devis est accepté !*\\n\\nVotre rendez-vous a bien été enregistré dans notre planning. 🗓️\\n\\nNous vous confirmons votre créneau très prochainement. À bientôt ! 🚗✨';\n\nconst confirmBody = JSON.stringify({ number: chatId, text: msgText });\n\nreturn [{ json: { ...calEvent, chatId, confirmBody } }];"
+      },
+      "id": "67d9f852-825b-49b0-b24c-4ed57b196b26",
+      "name": "Sauvegarder ID Cal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        1952
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({number: $('Extraire Données Callback').first().json.chatId, text: 'Pas de problème ! 😊 Un membre de notre équipe va vous contacter très prochainement pour finaliser votre demande.'}) }}",
+        "options": {}
+      },
+      "id": "ce4d41e5-41a4-4e78-9001-6edfbeddbce2",
+      "name": "Confirmer Annulation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        1504
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.confirmBody }}",
+        "options": {}
+      },
+      "id": "61334775-b0fa-4cc0-b9f9-c4e3f173cf5f",
+      "name": "Confirmer RDV Client",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        976,
+        2048
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list"
+        },
+        "start": "={{ $json.startDate }}",
+        "end": "={{ $json.endDate }}",
+        "additionalFields": {
+          "allday": "no",
+          "description": "={{ $json.description }}",
+          "location": "={{ $json.location }}",
+          "summary": "={{ $json.summary }}"
+        }
+      },
+      "id": "4b12f407-5f60-442d-864b-89c90d81f9b8",
+      "name": "Créer Événement Calendrier",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        1952
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "h0JBzDodIfM1PB8r",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst chatId = data.chatId;\nconst staticData = $getWorkflowStaticData('global');\nconst booking = staticData['booking_' + chatId];\nconst devisNum = $('Détecter Phase').first().json.devisNum || '';\n\nif (!booking) throw new Error('Réservation introuvable pour ' + chatId);\n\n// --- LOGIQUE DE RÉCUPÉRATION DU PRIX FIXÉ PAR LE PATRON ---\n// On regarde si un prix a été stocké spécifiquement pour cette session\nconst prixFixe = staticData['finalPrice_' + chatId]; \nconst prixAffiche = (prixFixe && prixFixe !== 0) ? prixFixe : booking.prix;\n// ---------------------------------------------------------\n\nconst durations = { express: 45, standard: 90, premium: 150, duo: 120, gold: 210 };\nconst duration = durations[booking.formule] || 90;\n\nconst [h, m] = booking.heure.split(':').map(Number);\nconst endMinutes = h * 60 + m + duration;\nconst endH = String(Math.floor(endMinutes / 60)).padStart(2, '0');\nconst endM = String(endMinutes % 60).padStart(2, '0');\n\nfunction frenchOffset(dateStr) {\n  const year = parseInt(dateStr.slice(0, 4));\n  const mar = new Date(Date.UTC(year, 2, 31));\n  mar.setUTCDate(31 - mar.getUTCDay());\n  const oct = new Date(Date.UTC(year, 9, 31));\n  oct.setUTCDate(31 - oct.getUTCDay());\n  const d = new Date(dateStr + 'T00:00:00Z');\n  return (d >= mar && d < oct) ? '+02:00' : '+01:00';\n}\n\nconst offset = frenchOffset(booking.date);\nconst startDate = booking.date + 'T' + booking.heure + ':00' + offset;\nconst endDate = booking.date + 'T' + endH + ':' + endM + ':00' + offset;\n\n// Photos du client (si envoyées)\nconst photoUrls = staticData['pendingPhotos_' + chatId] || [];\n\n// Nettoyage sélectif des données pour libérer la mémoire n8n\ndelete staticData['pendingPhotos_' + chatId];\ndelete staticData['booking_' + chatId];\ndelete staticData['finalPrice_' + chatId]; // On nettoie aussi le prix stocké\n\nreturn [{ json: {\n  chatId,\n  // Le titre contiendra le prix pour une visibilité immédiate dans l'agenda\n  summary: `🚗 ${booking.client} - ${booking.vehicule} (${prixAffiche !== 0 ? prixAffiche + '€' : 'Prix à fixer'}) — ${devisNum}`,\n  description: '👤 Client: ' + booking.client + \n               '\\n📞 Tél: ' + (booking.telephone || 'Non renseigné') + \n               '\\n🚘 Véhicule: ' + booking.vehicule + \n               '\\n🧼 Formule: ' + booking.formule + \n               '\\n💰 PRIX TOTAL : ' + (prixAffiche !== 0 ? prixAffiche + '€' : 'À CONFIRMER') + \n               '\\n📍 Adresse: ' + booking.adresse + \n               (photoUrls.length > 0 ? '\\n\\n📷 PHOTOS :\\n' + photoUrls.join('\\n') : ''),\n  startDate,\n  endDate,\n  location: booking.adresse,\n  booking: { ...booking, prix: prixAffiche } // On renvoie l'objet booking mis à jour\n} }];"
+      },
+      "id": "b5e4092e-4541-4caf-850e-9b0c4079e516",
+      "name": "Récupérer Booking + Préparer Cal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -368,
+        1888
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "is_accept",
+              "leftValue": "={{ $json.callbackData.startsWith('ACCEPT_') }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "113b8eda-d860-401e-a7b0-3a7566ddc99d",
+      "name": "Accepté ou Refusé?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1280,
+        1504
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "chatId",
+              "value": "={{ $json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "b2",
+              "name": "callbackData",
+              "value": "={{ ($json.body.data.message?.conversation || '').trim() === '1' ? 'ACCEPT_' + $json.body.data.key.remoteJid : 'DECLINE_' + $json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "b3",
+              "name": "firstName",
+              "value": "={{ $json.body.data.pushName || 'Client' }}",
+              "type": "string"
+            },
+            {
+              "id": "b4",
+              "name": "callbackQueryId",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d3703d66-06a6-48a0-bc05-3f066529dc7f",
+      "name": "Extraire Données Callback",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1952,
+        1792
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"number\": $json.chatId,\n  \"text\": $json.recap + \"\\n\\n━━━━━━━━━━━━━━━\\n*Veuillez répondre par :*\\n\\n1️⃣ pour *Confirmer*\\n2️⃣ pour *Annuler / Modifier*\",\n  \"delay\": 1000,\n  \"linkPreview\": false\n}\n}}",
+        "options": {}
+      },
+      "id": "d9f7db24-df7a-4b6b-b8ac-0374ede382c2",
+      "name": "Envoyer Récap + Boutons",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        976,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = $input.first().json.chatId;\nconst staticData = $getWorkflowStaticData('global');\nconst booking = staticData['booking_' + chatId];\nif (!booking) throw new Error('Booking introuvable dans staticData pour ' + chatId);\n\nconst dayNames   = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];\nconst monthNames = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];\nconst d       = new Date(booking.date + 'T00:00:00');\nconst dateStr = dayNames[d.getDay()] + ' ' + d.getDate() + ' ' + monthNames[d.getMonth()] + ' ' + d.getFullYear();\n\nconst vehicles = { citadine:'Citadine 🚗', berline:'Berline 🚙', suv:'SUV/4x4 🚕', utilitaire:'Utilitaire 🚐' };\nconst formulas = { express:'Express 🚿', standard:'Standard ✨', premium:'Premium 💎', duo:'Duo 🔄', gold:'Gold 🏆' };\n\nconst recap =\n  '🧾 *Récapitulatif de votre demande*\\n' +\n  '━━━━━━━━━━━━━━━\\n' +\n  '👤 *Client :* ' + (booking.client || 'Client') + '\\n' +\n  '📞 *Tél :* ' + (booking.telephone || 'Non renseigné') + '\\n' +\n  (vehicles[booking.vehicule] || booking.vehicule) + '\\n' +\n  (formulas[booking.formule] || booking.formule) + '\\n' +\n  '📍 *Adresse :* ' + booking.adresse + '\\n' +\n  '📅 *Date :* ' + dateStr + ' à ' + booking.heure + '\\n' +\n  '━━━━━━━━━━━━━━━';\n\n// Marquer que ce client attend une confirmation 1/2\nstaticData['awaitingConfirmation_' + chatId] = true;\n\nreturn [{ json: { chatId, recap, booking } }];"
+      },
+      "id": "f82fc8d4-64eb-4bfa-bd2c-4bc15c5e0fea",
+      "name": "Préparer Récap",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "booking_ready",
+              "leftValue": "={{ $json.isBookingReady }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c04957e0-c049-4674-a6da-5fea12b5c7cc",
+      "name": "RDV Prêt?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -144,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.chatId }}\",\n  \"text\": {{ JSON.stringify($json.output) }}\n}",
+        "options": {}
+      },
+      "id": "3dab9aa0-518f-4daf-a30d-bd8930419533",
+      "name": "Envoyer Réponse Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        80,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawText = ($('Extraire Données Message').first().json.text || '').trim();\nconst chatId = $('Extraire Données Message').first().json.chatId;\nconst staticData = $getWorkflowStaticData('global');\n\n// ── ANNULATION DEVIS PAR NUMÉRO ────────────────���────────────────────────������������������������������───────\nconst cancelMatch = rawText.match(/annule[^a-zA-Z]*(le\\s+)?devis\\s+(KK-\\d{4}-\\d{4})/i);\nif (cancelMatch) {\n  const devisNum = cancelMatch[2].toUpperCase();\n  ['booking_','pending_booking_','photoAsked_','etatAsked_','pendingPhotos_','awaitingConfirmation_','awaitingDevisConfirmation_'].forEach(k => delete staticData[k + chatId]);\n  const hasCalEvent = !!staticData['cal_event_' + chatId];\n  if (hasCalEvent) {\n    return [{ json: { chatId, devisNum, output: 'Votre devis ' + devisNum + ' et votre rendez-vous ont bien été annulés. 😊 Revenez quand vous voulez !', isBookingReady: false, directRecap: false, isCancelRequest: true, booking: null } }];\n  }\n  return [{ json: { chatId, devisNum, output: 'Votre devis ' + devisNum + ' a bien été annulé. 😊 Revenez quand vous voulez !', isBookingReady: false, directRecap: false, isCancelRequest: false, booking: null } }];\n}\n\n// ── RESET ────────────────────────────────────────────────────────────────────────\nif (rawText === '/reset') {\n  ['booking_','pending_booking_','photoAsked_','etatAsked_','pendingPhotos_','awaitingConfirmation_','awaitingDevisConfirmation_'].forEach(k => delete staticData[k + chatId]);\n  Object.keys(staticData).forEach(k => { if (k.startsWith('verified_' + chatId)) delete staticData[k]; });\n  return [{ json: { chatId, output: '✅ Conversation réinitialisée. Comment puis-je vous aider ? 😊', isBookingReady: false, directRecap: false, isCancelRequest: false, booking: null } }];\n}\n\nconst output = $input.first().json.output;\n\n// ── ÉTAT VÉHICULE — client répond après \"pas de photo\" ───────────────────────────\nif (staticData['etatAsked_' + chatId]) {\n  const etatMap = { 'normal': 'normal', 'sale': 'sale', 'très sale': 'tres_sale', 'tres sale': 'tres_sale', 'tres_sale': 'tres_sale' };\n  const etat = etatMap[rawText.toLowerCase().trim()];\n  if (etat) {\n    const booking = staticData['booking_' + chatId];\n    if (booking) {\n      booking.etat = etat;\n      delete staticData['etatAsked_' + chatId];\n      return [{ json: { chatId, output: 'Je prépare votre récapitulatif... ⏳', isBookingReady: false, directRecap: true, isCancelRequest: false, booking: null } }];\n    }\n  }\n  return [{ json: { chatId, output: \"Merci de choisir l'état de votre véhicule :\\n• *Normal* 🟢\\n• *Sale* 🟡\\n• *Très sale* 🔴\", isBookingReady: false, directRecap: false, isCancelRequest: false, booking: null } }];\n}\n\n// ── PAS DE PHOTO — demander l'état ───────────────────────────────────────────────\nif (staticData['photoAsked_' + chatId] && rawText.match(/pas de photo|sans photo|aucune photo/i)) {\n  delete staticData['photoAsked_' + chatId];\n  staticData['etatAsked_' + chatId] = true;\n  return [{ json: { chatId, output: \"Pas de problème ! 😊\\n\\nQuel est l'état de votre véhicule ?\\n• *Normal* 🟢\\n• *Sale* 🟡\\n• *Très sale* 🔴\", isBookingReady: false, directRecap: false, isCancelRequest: false, booking: null } }];\n}\n\n// ── DÉTECTION TAG [BOOKING] ───────────────────────────────────────────────────────\nconst bookingMatch = output.match(/\\[BOOKING\\]([\\s\\S]*?)\\[\\/BOOKING\\]/);\nlet booking = null;\n\nif (bookingMatch) {\n  try {\n    const rawJson = bookingMatch[1].trim().replace(/nombre_entier/g, '0').replace(/:\\s*[a-z_]+_[a-z_]+/gi, ': null');\n    booking = JSON.parse(rawJson);\n    booking.etat = 'normal';\n    const FAKE = ['client','prenom_du_client','prenom nom','prenom','nom','','undefined','null'];\n    const phone = (chatId || '').replace('@s.whatsapp.net', '');\n    if (!booking.client || FAKE.includes(booking.client.toLowerCase().trim())) {\n      booking.client = booking.telephone || phone;\n    }\n    // Stocker directement + flag photo (la vérif dispo se fait d'abord)\n    staticData['booking_' + chatId] = booking;\n    staticData['photoAsked_' + chatId] = true;\n  } catch (e) { console.error('Erreur JSON Booking: ' + e.message); }\n}\n\nconst cleanOutput = output.replace(/\\[BOOKING\\][\\s\\S]*?\\[\\/BOOKING\\]/, '').trim();\n\nif (booking) {\n  // isBookingReady:true → vérif dispo → si ok → demander photos\n  return [{ json: { chatId, output: cleanOutput, isBookingReady: true, directRecap: false, isCancelRequest: false, booking } }];\n}\n\nreturn [{ json: { chatId, output: cleanOutput, isBookingReady: false, directRecap: false, isCancelRequest: false, booking: null } }];"
+      },
+      "id": "aadd799d-35b2-46b9-aa5a-4ee7bd391863",
+      "name": "Détecter et Stocker RDV",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -368,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "chatId",
+              "value": "={{ $json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "text",
+              "value": "={{ $json.body.data.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "firstName",
+              "value": "={{ $json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "sessionId",
+              "value": "={{ 'kooki_' + $json.body.data.key.remoteJid.replace('@s.whatsapp.net', '') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "24919461-f967-4fbd-9126-fdf8ca2fdd9d",
+      "name": "Extraire Données Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1728,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "is_confirmation",
+              "leftValue": "={{ ['1','2'].includes(($json.body.data.message?.conversation || '').trim()) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "94198b31-9225-4ab4-807e-809e07084b4c",
+      "name": "Route: Message ou Callback?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -2176,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ ($json.bookingContext ? $json.bookingContext + '\\n' : '') + ($json.formulesContext ? '[FORMULES]\\n' + $json.formulesContext + '[/FORMULES]\\n\\n' : '') + ($json.urgencyContext ? '[URGENCES]\\n' + $json.urgencyContext + '\\n[/URGENCES]\\n\\n' : '') + '[DATES_DISPONIBLES]\\n' + $json.calendarContext + '\\n[/DATES_DISPONIBLES]\\n\\n' + $json.text }}",
+        "options": {
+          "systemMessage": "## RÈGLE ABSOLUE PRIX (USAGE INTERNE UNIQUEMENT)\nON NE PARLE PLUS JAMAIS DE L'ETAT DU VEHICULE TU NE CONNAITRAS JAMAIS SON ETAT\nLes prix servent UNIQUEMENT à remplir le champ \"prix\" dans [BOOKING] — JAMAIS à l'afficher au client. Ne JAMAIS mentionner de prix. Si demandé, répondre : \"Un devis personnalisé vous sera envoyé par notre équipe.\"\n\nTu es le gérant de Kookii Clean, service de lavage automobile à domicile. Sois chaleureux, professionnel et utilise des emojis. Dès que tu connais le prénom du client, utilise-le pour t'adresser à lui dans chaque message.\n\n## PROCESSUS DE RÉSERVATION — 3 ÉTAPES OBLIGATOIRES\n\n### RAPPEL MÉMOIRE (TRÈS IMPORTANT)\nSi un bloc [INFOS_DÉJÀ_COLLECTÉES] est présent dans le contexte, considère que ces informations sont acquises. Ne les redemande PAS.\nSi l'utilisateur propose une nouvelle date/heure suite à un créneau indisponible, utilise les données de ce bloc pour générer directement le tag [BOOKING] dès que la nouvelle date est validée.\n\n### Étape 1 : Collecter les 6 informations\nPose UNIQUEMENT ces questions. Modèle EXACT :\n---\nBonjour ! 😊 Pour prendre votre rendez-vous, j'ai besoin de :\n1. Votre prénom et nom\n2. Type de véhicule (citadine / berline / SUV-4x4 / utilitaire)\n3. Formule souhaitée (express / standard / premium / duo / gold)\n4. Adresse complète de prestation\n5. Date et heure souhaitées\n6. Numéro de téléphone (10 chiffres)\n---\nL'état du véhicule ne doit JAMAIS apparaître ici.\n\n### Étape 2 : Vérifier la disponibilité (outil VERIFIER_DISPONIBILITE)\n\n### Étape 3 : Générer [BOOKING]\nDès que tu as les 6 informations et que le créneau est libre, génère immédiatement le tag ci-dessous.\nIMPORTANT : Utilise TOUJOURS \"etat\": \"normal\" dans le JSON. Ne pose JAMAIS de question sur l'état ou les photos.\n\n[BOOKING]\n{\"client\":\"Prénom NOM\",\"vehicule\":\"citadine|berline|suv|utilitaire\",\"formule\":\"express|standard|premium|duo|gold\",\"etat\":\"normal\",\"adresse\":\"adresse_complete\",\"date\":\"YYYY-MM-DD\",\"heure\":\"HH:MM\",\"prix\":0,\"telephone\":\"numero_donne_par_le_client\"}\n[/BOOKING]\n\nAprès le tag : \"Je prépare votre récapitulatif immédiatement... ⏳\"\n\n## RÈGLES CALENDRIER\nUtilise uniquement les dates ISO du bloc [DATES_DISPONIBLES]. Ne calcule jamais de date.\n\n## ANNULATION\nSi annulation demandée : inclure [CANCEL].",
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -784,
+        192
+      ],
+      "id": "f7d24563-da64-4379-9ae5-2539d2c2d074",
+      "name": "Agent IA Kookii Clean"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has_token",
+              "leftValue": "={{ $json.telegramToken }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fa805f78-61e2-47e3-b880-069d017fc6cd",
+      "name": "Token Configuré?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -368,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=={{ \"https://api.telegram.org/bot\" + $json.telegramToken + \"/getFile\" }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "file_id",
+              "value": "=={{ $json.fileId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -144,
+        1024
+      ],
+      "id": "637e21a3-01a4-4b4b-b433-8a42465d2121",
+      "name": "Obtenir Infos Photo"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "Merci pour la photo 📸 Je note votre véhicule.\\n\\nQuel est l'état de votre véhicule ?\\n\\n😊 Normal\\n🟡 Sale 🟡\\n🔴 Très sale 🔴",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": ""
+        }
+      },
+      "id": "d9dfb100-ce8b-4b45-a587-4e24c44011da",
+      "name": "Demander Config Token",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -144,
+        1408
+      ],
+      "webhookId": "db9c8198-3378-4930-99c2-469f36d7a3ff",
+      "credentials": {
+        "telegramApi": {
+          "id": "991Go5vHkY9eZspl",
+          "name": "TelegramKookiiClean"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const filePath = $json.result.file_path;\nconst staticData = $getWorkflowStaticData('global');\nconst token = staticData['telegramBotToken'] || '';\nconst chatId = $('Lire Token StaticData1').first().json.chatId;\nconst firstName = $('Lire Token StaticData1').first().json.firstName;\n\nconst imageUrl = `https://api.telegram.org/file/bot${token}/${filePath}`;\n\nconst prompt = `Tu es un expert en nettoyage automobile professionnel. Analyse l'\\u00e9tat de propret\\u00e9 de ce v\\u00e9hicule selon ces crit\\u00e8res STRICTS :\n\n- normal : V\\u00e9hicule propre ou tr\\u00e8s l\\u00e9g\\u00e8rement poussi\\u00e9reux. Aucune tache visible, aucun d\\u00e9p\\u00f4t notable. Aspect g\\u00e9n\\u00e9ral soign\\u00e9.\n- sale : Poussière accumul\\u00e9e, quelques taches ou traces visibles, vitres sal\\u00e9es, int\\u00e9rieur avec d\\u00e9bris l\\u00e9gers. N\\u00e9cessite un lavage standard.\n- tres_sale : Boue \\u00e9paisse, salet\\u00e9 tr\\u00e8s accumul\\u00e9e sur plusieurs zones, taches importantes difficiles \\u00e0 enlever, v\\u00e9hicule manifestement n\\u00e9glig\\u00e9 depuis longtemps. En cas de doute entre sale et tres_sale, choisis sale.\n\nR\\u00e9ponds UNIQUEMENT en JSON valide sans markdown : {\"etat\":\"normal|sale|tres_sale\",\"justification\":\"description concise en fran\\u00e7ais de ce qui justifie ce niveau\",\"confiance\":\"haute|moyenne|basse\"}`;\n\nconst requestBody = JSON.stringify({\n  model: 'gpt-4o-mini',\n  messages: [{\n    role: 'user',\n    content: [\n      { type: 'image_url', image_url: { url: imageUrl } },\n      { type: 'text', text: prompt }\n    ]\n  }],\n  max_tokens: 200\n});\n\nreturn [{ json: { chatId, firstName, imageUrl, requestBody } }];"
+      },
+      "id": "065b5af9-2498-4288-a29a-9f4f7856f2ef",
+      "name": "Préparer URL Vision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.requestBody }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        304,
+        1024
+      ],
+      "id": "d400e0b6-8239-47fd-a79a-ec39a8d3f963",
+      "name": "Analyser Photo Véhicule",
+      "credentials": {
+        "openAiApi": {
+          "id": "yKzgSw6lPM36G7fm",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = $('Extraire Données Photo1').first().json.chatId;\nconst firstName = $('Extraire Données Photo1').first().json.firstName;\n\nlet etat = 'normal';\nlet justification = '';\nlet confiance = 'moyenne';\n\ntry {\n  const content = $json.choices[0].message.content;\n  const clean = content.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n  const parsed = JSON.parse(clean);\n  etat = parsed.etat || 'normal';\n  justification = parsed.justification || '';\n  confiance = parsed.confiance || 'moyenne';\n} catch(e) {\n  const raw = $json.choices?.[0]?.message?.content || '';\n  if (raw.includes('tres_sale') || raw.includes('très sale')) etat = 'tres_sale';\n  else if (raw.includes('sale')) etat = 'sale';\n}\n\n// Stocker l'état dans les données statiques\nconst staticData = $getWorkflowStaticData('global');\nstaticData['etat_vehicule_' + chatId] = { etat, justification, confiance };\n\nconst labels = { normal: 'Normal ✅', sale: 'Sale 🟡', tres_sale: 'Très sale 🔴' };\nconst label = labels[etat] || 'Normal ✅';\n\nlet message = `📸 *Analyse de votre véhicule*\\n\\n`;\nmessage += `État détecté : *${label}*\\n`;\nif (justification) message += `_${justification}_\\n`;\nif (confiance === 'basse') message += `\\n⚠️ Faible confiance — l'éclairage peut affecter la précision.\\n`;\nmessage += `\\nJe prends cet état en compte pour votre devis. Dites-moi si je me trompe.`;\n\nreturn [{ json: { chatId, firstName, output: message } }];"
+      },
+      "id": "f7b0774e-b8e3-4647-beca-f0bc99f8b79b",
+      "name": "Traiter Analyse Photo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ 'kooki_v5_' + $('Extraire Donn\\u00e9es Message').first().json.chatId }}",
+        "contextWindowLength": 20
+      },
+      "id": "ce33105e-c64c-4e95-8493-53c0f8a3ba87",
+      "name": "Mémoire Conversation",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -704,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "name": "verifier_disponibilite",
+        "description": "Vérifie si un créneau est disponible dans le calendrier. Appelle cet outil DES QUE le client mentionne une date ET une heure.",
+        "jsCode": "try {\n  const date = $fromAI('date', 'Date au format YYYY-MM-DD', 'string');\n  const heure = $fromAI('heure', 'Heure au format HH:MM', 'string');\n  const formule = $fromAI('formule', 'Formule : express, standard, premium, duo ou gold. Utilise standard si inconnu.', 'string');\n\n  const staticData = $getWorkflowStaticData('global');\n  const chatId = $('Extraire Données Message').first().json.chatId;\n  const verifiedKey = `verified_${chatId}_${date}_${heure}`;\n\n  // Si déjà vérifié pour ce créneau dans cette session\n  if (staticData[verifiedKey] === 'DISPONIBLE') {\n    return 'DISPONIBLE - créneau déjà vérifié. NE PAS rappeler cet outil. Génère [BOOKING] maintenant.';\n  }\n  if (staticData[verifiedKey] === 'INDISPONIBLE') {\n    return 'INDISPONIBLE - créneau déjà vérifié. NE PAS rappeler cet outil. Propose les alternatives déjà données.';\n  }\n\n  const durations = { express: 45, standard: 90, premium: 150, duo: 120, gold: 210 };\n  const duration = durations[formule] || 90;\n  const [h, m] = heure.split(':').map(Number);\n  const slotStart = h * 60 + m;\n  const slotEnd = slotStart + duration;\n\n  const bookedSlots = staticData['bookedSlotsCache'] || [];\n\n  const hasConflict = bookedSlots.some(bs => {\n    if (bs.date !== date) return false;\n    const bsStart = bs.startH * 60 + bs.startM;\n    const bsEnd = bs.endH * 60 + bs.endM;\n    return slotStart < bsEnd && slotEnd > bsStart;\n  });\n\n  if (!hasConflict) {\n    staticData[verifiedKey] = 'DISPONIBLE';\n    return 'DISPONIBLE';\n  }\n\n  const dayNames = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];\n  const monthNames = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];\n  const alternatives = [];\n  const baseDate = new Date(date + 'T12:00:00Z');\n  let offset = 1;\n  while (alternatives.length < 3 && offset <= 10) {\n    const next = new Date(baseDate);\n    next.setUTCDate(baseDate.getUTCDate() + offset);\n    const nextDate = `${next.getUTCFullYear()}-${String(next.getUTCMonth()+1).padStart(2,'0')}-${String(next.getUTCDate()).padStart(2,'0')}`;\n    const conflict = bookedSlots.some(bs => {\n      if (bs.date !== nextDate) return false;\n      const bsStart = bs.startH * 60 + bs.startM;\n      const bsEnd = bs.endH * 60 + bs.endM;\n      return slotStart < bsEnd && slotEnd > bsStart;\n    });\n    if (!conflict) {\n      alternatives.push(`${dayNames[next.getUTCDay()]} ${String(next.getUTCDate()).padStart(2,'0')} ${monthNames[next.getUTCMonth()]} \\u00e0 ${heure}`);\n    }\n    offset++;\n  }\n  staticData[verifiedKey] = 'INDISPONIBLE';\n  return `INDISPONIBLE. Proposer immédiatement ces alternatives libres : ${alternatives.join(', ')}.`;\n} catch(e) {\n  return 'DISPONIBLE';\n}"
+      },
+      "id": "0fcdd447-8d66-424e-a105-b6f8e5454155",
+      "name": "Vérifier Disponibilité",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.1,
+      "position": [
+        -576,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -832,
+        416
+      ],
+      "id": "82341069-9fbd-481e-8ed9-cf6a30a85b79",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "yKzgSw6lPM36G7fm",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = $('Extraire Données Callback').first().json.chatId;\nconst staticData = $getWorkflowStaticData('global');\nconst bookingData = staticData['booking_' + chatId];\nif (!bookingData) throw new Error('Booking introuvable pour ' + chatId);\n\nconst dayNames   = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];\nconst monthNames = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];\nconst d       = new Date(bookingData.date + 'T00:00:00');\nconst dateStr = dayNames[d.getDay()] + ' ' + d.getDate() + ' ' + monthNames[d.getMonth()] + ' ' + d.getFullYear();\n\nconst vehicles = { citadine:'Citadine', berline:'Berline', suv:'SUV/4x4', utilitaire:'Utilitaire' };\nconst formulas = { express:'Express', standard:'Standard', premium:'Premium', duo:'Duo', gold:'Gold' };\n\nconst FAKE_NAMES_D = ['client','prenom_du_client','prenom nom','prenom','nom','','undefined'];\nconst clientName = (!bookingData.client || FAKE_NAMES_D.includes(bookingData.client.toLowerCase().trim()))\n  ? (bookingData.telephone || chatId.replace('@s.whatsapp.net', ''))\n  : bookingData.client;\nconst prenom     = clientName.split(' ')[0];\nconst vehicule   = vehicles[bookingData.vehicule] || bookingData.vehicule;\nconst formule    = formulas[bookingData.formule]  || bookingData.formule;\nconst clientNum  = chatId.replace('@s.whatsapp.net', '');\n\n// Générer numéro de devis unique\nconst now = new Date();\nconst devisNum = 'KK-' + now.getFullYear() + '-' + String(Math.floor(Math.random() * 9000) + 1000);\n\n// Texte du devis pré-rédigé avec le numéro (le patron remplace ___€)\nconst devisText =\n  'Bonjour ' + prenom + ' ! 👋\\n\\n' +\n  'Suite à votre demande, voici votre devis *Kookii Clean* :\\n\\n' +\n  '🚗 ' + vehicule + ' — Formule ' + formule + '\\n' +\n  '📍 ' + bookingData.adresse + '\\n' +\n  '📅 ' + dateStr + ' à ' + bookingData.heure + '\\n' +\n  '💰 Prix : ___€\\n\\n' +\n  '🔖 Réf. devis : *' + devisNum + '*\\n\\n' +\n  'Répondez *1* pour accepter ou *2* pour refuser.\\n' +\n  '_(Pour annuler plus tard : \"annule le devis ' + devisNum + '\")_';\n\nconst waLink = 'https://wa.me/' + clientNum + '?text=' + encodeURIComponent(devisText);\n\n// Stocker le numéro de devis dans awaitingDevisConfirmation (sera lu par Détecter Phase)\nstaticData['awaitingDevisConfirmation_' + chatId] = devisNum;\n\nconst infoPatron =\n  '🔔 *Nouvelle demande — ' + clientName + '*\\n' +\n  '🚗 ' + vehicule + ' — ' + formule + '\\n' +\n  '📍 ' + bookingData.adresse + '\\n' +\n  '📅 ' + dateStr + ' à ' + bookingData.heure + '\\n' +\n  '🔖 Réf. : *' + devisNum + '*\\n\\n' +\n  '👇 *Ajoutez le prix et appuyez Envoyer :*\\n' + waLink;\n\nconst devisBody = JSON.stringify({ number: '33684140438', text: infoPatron });\n\nreturn [{ json: { devisBody } }];"
+      },
+      "id": "devis-code-patron-001",
+      "name": "Préparer Devis Patron",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        1312
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.devisBody }}",
+        "options": {}
+      },
+      "id": "devis-http-patron-001",
+      "name": "Envoyer Devis Patron",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        1312
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = $json.chatId;\nconst callbackData = $json.callbackData;\nconst staticData = $getWorkflowStaticData('global');\n\nconst devisVal = staticData['awaitingDevisConfirmation_' + chatId];\nconst isDevisPhase = !!devisVal;\nconst devisNum = typeof devisVal === 'string' ? devisVal : null;\nconst isAccept = callbackData.startsWith('ACCEPT_');\n\nreturn [{ json: { chatId, callbackData, isDevisPhase, isAccept, devisNum } }];"
+      },
+      "id": "detecter-phase-001",
+      "name": "Détecter Phase",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1728,
+        1792
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "is_devis",
+              "leftValue": "={{ $json.isDevisPhase }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "phase-devis-if-001",
+      "name": "Phase Devis?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1504,
+        1792
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = $json.chatId;\nconst devisNum = $json.devisNum || '';\nconst staticData = $getWorkflowStaticData('global');\n\ndelete staticData['awaitingDevisConfirmation_' + chatId];\n\nconst msgClient = 'D\\'accord, pas de problème ! 😊\\n\\nSi vous changez d\\'avis, n\\'hésitez pas à nous recontacter.';\nconst msgPatron = '❌ *Le client a refusé le devis ' + devisNum + '.*';\n\nconst clientBody = JSON.stringify({ number: chatId, text: msgClient });\nconst patronBody = JSON.stringify({ number: '33684140438', text: msgPatron });\n\nreturn [{ json: { clientBody, patronBody } }];"
+      },
+      "id": "preparer-reponse-devis-001",
+      "name": "Préparer Réponse Devis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        2176
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.clientBody }}",
+        "options": {}
+      },
+      "id": "envoyer-rep-client-001",
+      "name": "Envoyer Réponse Devis Client",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        2272
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.patronBody }}",
+        "options": {}
+      },
+      "id": "notifier-owner-devis-001",
+      "name": "Notifier Owner Réponse Devis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -368,
+        2272
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "is_accept",
+              "leftValue": "={{ $json.isAccept }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "accept-refus-devis-if-001",
+      "name": "Accepté/Refusé Devis?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1280,
+        2080
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ (() => {\n  const booking = $('Récupérer Booking + Préparer Cal').first().json.booking;\n  const devisNum = $('Détecter Phase').first().json.devisNum || '';\n  const client = booking?.client || 'Client';\n  const tel = booking?.telephone || $('Sauvegarder ID Cal').first().json.chatId?.replace('@s.whatsapp.net','') || '';\n  const msg = '✅ *Le client ' + client + ' (' + tel + ') a accepté le devis ' + devisNum + '.* Le RDV a été ajouté au calendrier ! 🗓️';\n  return JSON.stringify({ number: '33684140438', text: msg });\n})() }}",
+        "options": {}
+      },
+      "id": "notify-owner-accept-001",
+      "name": "Notifier Owner Accept",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        2048
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = $json.body.data.key.remoteJid;\nconst staticData = $getWorkflowStaticData('global');\nconst imgMsg = $json.body.data.message?.imageMessage;\nconst photoUrl = imgMsg?.url || imgMsg?.directPath || 'photo_recue';\nconst isBookingPhoto = !!staticData['photoAsked_' + chatId];\n\nif (isBookingPhoto) {\n  if (!staticData['pendingPhotos_' + chatId]) staticData['pendingPhotos_' + chatId] = [];\n  if (photoUrl) staticData['pendingPhotos_' + chatId].push(photoUrl);\n  delete staticData['photoAsked_' + chatId];\n  // booking déjà dans booking_chatId (stocké lors de la détection [BOOKING])\n  return [{ json: { chatId, isBookingPhoto: true, photoUrl, messageData: $json.body.data } }];\n}\nreturn [{ json: { chatId, isBookingPhoto: false } }];"
+      },
+      "id": "detect-contexte-photo-001",
+      "name": "Détecter Contexte Photo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1504,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "is_booking_photo",
+              "leftValue": "={{ $json.isBookingPhoto }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "photo-booking-if-001",
+      "name": "Photo Booking?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1280,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $json.chatId, text: \"📸 Photos reçues, merci !\\n\\nJe prépare votre récapitulatif... ⏳\" }) }}",
+        "options": {}
+      },
+      "id": "envoyer-photo-recue-001",
+      "name": "Envoyer Photo Reçue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        304,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/chat/findMessages/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"where\": {\n    \"remoteJid\": \"33684140438@s.whatsapp.net\"\n  },\n  \"take\": 20\n}",
+        "options": {}
+      },
+      "id": "recup-messages-client-001",
+      "name": "Récupérer Messages Client",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1056,
+        1888
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// chatId vient de Détecter Phase (en amont)\nconst chatId = $('Détecter Phase').first().json.chatId;\nconst staticData = $getWorkflowStaticData('global');\n\n// Réponse Evolution API — plusieurs formats possibles\nconst raw = $input.first().json;\nconst messages = raw.messages?.records || raw.messages || raw.records || raw || [];\n\n// Chercher le message envoyé PAR le bot (fromMe: true) contenant un prix en €\nlet prix = 0;\n\nconst msgsArray = Array.isArray(messages) ? messages : Object.values(messages);\n// Du plus récent au plus ancien\nconst sorted = [...msgsArray].sort((a, b) => (b.messageTimestamp || 0) - (a.messageTimestamp || 0));\n\nfor (const m of sorted) {\n  if (!m.key?.fromMe) continue;\n  const text =\n    m.message?.conversation ||\n    m.message?.extendedTextMessage?.text ||\n    m.message?.imageMessage?.caption || '';\n  // Cherche \"Prix : 85€\" ou \"Prix : 85 €\" ou n'importe quel nombre suivi de €\n  const match = text.match(/Prix\\s*:\\s*(\\d+(?:[.,]\\d+)?)\\s*€/i)\n             || text.match(/(\\d+(?:[.,]\\d+)?)\\s*€/);\n  if (match) {\n    prix = parseFloat(match[1].replace(',', '.'));\n    break;\n  }\n}\n\n// Mettre à jour le booking dans staticData avec le prix extrait\nif (staticData['booking_' + chatId]) {\n  staticData['booking_' + chatId].prix = prix;\n  console.log('Prix extrait :', prix, '€ → booking_' + chatId + ' mis à jour');\n} else {\n  console.warn('Booking introuvable pour', chatId, '— prix non mis à jour');\n}\n\nreturn [{ json: { chatId, prix } }];"
+      },
+      "id": "extraire-prix-devis-001",
+      "name": "Extraire Prix Devis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        1888
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "always-true",
+              "leftValue": "={{ $json.body.data.key.fromMe !== undefined }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2400,
+        1216
+      ],
+      "id": "0c4e93df-43d6-49b2-b676-6d23b4d07ec1",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = $('Détecter Contexte Photo').first().json.chatId;\nreturn [{ json: { chatId } }];"
+      },
+      "id": "passer-info-photo-001",
+      "name": "Passer Info Photo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "is_direct_recap",
+              "leftValue": "={{ $('Détecter et Stocker RDV').first().json.directRecap }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "recap-direct-if-001",
+      "name": "Récap Direct?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        304,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = $('Détecter et Stocker RDV').first().json.chatId;\nreturn [{ json: { chatId } }];"
+      },
+      "id": "passer-info-etat-001",
+      "name": "Passer Info État",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $('Préparer Vérif Immédiate').first().json.chatId, text: \"📸 Presque terminé !\\n\\nPourriez-vous m'envoyer une ou plusieurs photos de votre véhicule ?\\n_(Répondez *pas de photo* si vous n'en avez pas)_\" }) }}",
+        "options": {}
+      },
+      "id": "demander-photos-001",
+      "name": "Demander Photos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        976,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleCalendarOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $('Détecter et Stocker RDV').first().json.devisNum }}"
+            },
+            {
+              "name": "singleEvents",
+              "value": "true"
+            },
+            {
+              "name": "maxResults",
+              "value": "5"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "chercher-event-cancel-001",
+      "name": "Chercher Événement Cancel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        752,
+        736
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "h0JBzDodIfM1PB8r",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  number: '33684140438',\n  text: \"📊 *BILAN KOOKI CLEAN*\\n---\\n📅 CA Semaine : \" + $json.ca_semaine + \"€\\n🌙 CA Mois : \" + $json.ca_mois + \"€\\n📈 Clients actifs : \" + $json.total_clients\n}) }}",
+        "options": {}
+      },
+      "id": "envoyer-stats-owner-001",
+      "name": "Envoyer Stats Owner",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3072,
+        2944
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/databases/34d5b604-d309-81bb-a42a-de56e2c9fbd1/query",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"page_size\":100}",
+        "options": {}
+      },
+      "id": "notion-http-query-001",
+      "name": "Requêter Notion CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3520,
+        2944
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp = $input.first().json;\nconst pages = resp.results || [];\n\nconst now = new Date();\nconst monday = new Date(now);\nmonday.setHours(0,0,0,0);\nmonday.setDate(now.getDate() - ((now.getDay() + 6) % 7));\nconst firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);\n\nlet ca_semaine = 0, ca_mois = 0, total_clients = 0;\n\nfor (const page of pages) {\n  const props = page.properties || {};\n  const statut = (props['Statut'] && props['Statut'].status) ? props['Statut'].status.name : '';\n  if (statut !== 'Payé' && statut !== 'RDV Confirmé') continue;\n  const prix = (props['Prix'] && props['Prix'].number != null) ? props['Prix'].number : 0;\n  const dateStr = (props['Date RDV'] && props['Date RDV'].date) ? props['Date RDV'].date.start : null;\n  if (!dateStr) continue;\n  const rdvDate = new Date(dateStr);\n  total_clients++;\n  if (rdvDate >= firstOfMonth) ca_mois    += prix;\n  if (rdvDate >= monday)       ca_semaine += prix;\n}\n\nreturn [{ json: { ca_semaine, ca_mois, total_clients } }];"
+      },
+      "id": "calc-stats-crm-002",
+      "name": "Calculer Stats CRM",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3296,
+        2944
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const calData  = $('Récupérer Booking + Préparer Cal').first().json;\nconst booking   = calData.booking || {};\nconst devisNum  = $('Détecter Phase').first().json.devisNum || '';\nconst chatId    = calData.chatId || '';\n\nlet prix = 0;\ntry { prix = $('Extraire Prix Devis').first().json.prix || 0; } catch(e) {}\nif (!prix && booking.prix) prix = booking.prix;\n\nconst dateRDV = booking.date || null;\nconst tel = (booking.telephone || chatId.replace('@s.whatsapp.net', '')).replace(/\\D/g, '');\nconst telFormatted = tel.startsWith('33') ? '+' + tel : tel.startsWith('0') ? '+33' + tel.slice(1) : tel;\n\nconst payload = {\n  parent: { database_id: '34d5b604-d309-81bb-a42a-de56e2c9fbd1' },\n  properties: {\n    'Nom':       { title:        [{ text: { content: booking.client || 'Client' } }] },\n    'Prix':      { number:       prix },\n    'Date RDV':  { date:         dateRDV ? { start: dateRDV } : null },\n    'Formule':   { select:       { name: booking.formule || 'express' } },\n    'Téléphone': { phone_number: telFormatted || null },\n    'V��hicule':  { rich_text:    [{ text: { content: booking.vehicule || '' } }] },\n    'Adresse':   { rich_text:    [{ text: { content: booking.adresse || '' } }] },\n    'DevisNum':  { rich_text:    [{ text: { content: devisNum } }] },\n    'Statut':    { status:       { name: 'RDV Confirmé' } }\n  }\n};\n\nreturn [{ json: { payload: JSON.stringify(payload) } }];"
+      },
+      "id": "prep-notion-crm-001",
+      "name": "Préparer Entrée CRM",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        1840
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.payload }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "notion-create-page-001",
+      "name": "Enregistrer dans CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        1840
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data     = $('Détecter Phase').first().json;\nconst chatId   = data.chatId || '';\nconst devisNum = data.devisNum || '';\nconst staticData = $getWorkflowStaticData('global');\nconst booking  = staticData['booking_' + chatId] || {};\n\nconst tel = (booking.telephone || chatId.replace('@s.whatsapp.net','')).replace(/\\D/g,'');\nconst telF = tel.startsWith('33') ? '+'+tel : tel.startsWith('0') ? '+33'+tel.slice(1) : tel;\nconst today = new Date().toISOString().slice(0,10);\n\nconst payload = {\n  parent: { database_id: '34d5b604-d309-81bb-a42a-de56e2c9fbd1' },\n  properties: {\n    'Nom':        { title:     [{ text: { content: booking.client || 'Client' } }] },\n    'Prix':       { number:    booking.prix || 0 },\n    'Formule':    { select:    { name: booking.formule || 'express' } },\n    'Téléphone':  { phone_number: telF || null },\n    'Véhicule':   { rich_text: [{ text: { content: booking.vehicule || '' } }] },\n    'Adresse':    { rich_text: [{ text: { content: booking.adresse  || '' } }] },\n    'DevisNum':   { rich_text: [{ text: { content: devisNum } }] },\n    'Date Refus': { date:      { start: today } },\n    'Statut':     { status:    { name: 'Refusé' } }\n  }\n};\nreturn [{ json: { payload: JSON.stringify(payload) } }];"
+      },
+      "id": "prep-notion-refus-001",
+      "name": "Préparer Refus CRM",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        2080
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.payload }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "notion-create-refus-001",
+      "name": "Enregistrer Refus CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -368,
+        2080
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/databases/34d5b604-d309-81bb-a42a-de56e2c9fbd1/query",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ filter: { property: 'DevisNum', rich_text: { equals: $('Détecter et Stocker RDV').first().json.devisNum || '' } }, page_size: 1 }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "notion-search-annul-001",
+      "name": "Chercher Entrée CRM Annulation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1648,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = $input.first().json.results || [];\nconst devisNum = $('Détecter et Stocker RDV').first().json.devisNum || '';\nconst chatId   = $('Détecter et Stocker RDV').first().json.chatId || '';\nconst staticData = $getWorkflowStaticData('global');\nconst booking  = staticData['booking_' + chatId] || {};\n\nif (results.length > 0) {\n  // Page trouvée → on update\n  return [{ json: {\n    mode: 'update',\n    pageId: results[0].id,\n    devisNum\n  }}];\n}\n\n// Pas trouvée → on crée\nconst tel = (booking.telephone || chatId.replace('@s.whatsapp.net','')).replace(/\\D/g,'');\nconst telF = tel.startsWith('33') ? '+'+tel : tel.startsWith('0') ? '+33'+tel.slice(1) : tel;\n\nreturn [{ json: {\n  mode: 'create',\n  devisNum,\n  payload: JSON.stringify({\n    parent: { database_id: '34d5b604-d309-81bb-a42a-de56e2c9fbd1' },\n    properties: {\n      'Nom':       { title:     [{ text: { content: booking.client || 'Client' } }] },\n      'DevisNum':  { rich_text: [{ text: { content: devisNum } }] },\n      'Téléphone': { phone_number: telF || null },\n      'Statut':    { status:    { name: 'Annulé' } }\n    }\n  })\n}}];"
+      },
+      "id": "decide-annul-crm-001",
+      "name": "Décider Annulation CRM",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "method": "={{ $json.mode === 'update' ? 'PATCH' : 'POST' }}",
+        "url": "={{ $json.mode === 'update' ? 'https://api.notion.com/v1/pages/' + $json.pageId : 'https://api.notion.com/v1/pages' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.mode === 'update' ? JSON.stringify({ properties: { 'Statut': { status: { name: 'Annulé' } } } }) : $json.payload }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "notion-annul-page-002",
+      "name": "Enregistrer Annulation CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2096,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "crm-rule",
+                    "leftValue": "={{ $json.body.data.message?.conversation }}",
+                    "rightValue": "/crm",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "booking-rule",
+                    "leftValue": "={{ $json.body.data.message?.conversation }}",
+                    "rightValue": "/booking",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-admin-cmd-001",
+      "name": "Détecter Commande Admin",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -3520,
+        2720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/databases/34d5b604-d309-81bb-a42a-de56e2c9fbd1/query",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  filter: {\n    and: [\n      { property: 'Date RDV', date: { on_or_after: new Date().toISOString().slice(0,10) } },\n      { property: 'Statut', status: { equals: 'RDV Confirmé' } }\n    ]\n  },\n  sorts: [{ property: 'Date RDV', direction: 'ascending' }],\n  page_size: 20\n}) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "notion-booking-query-001",
+      "name": "Requêter Bookings Notion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3520,
+        2496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const pages = $input.first().json.results || [];\n\nif (pages.length === 0) {\n  return [{ json: { message: '📅 *Aucun RDV confirmé à venir.* 😊' } }];\n}\n\nconst jours = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];\nconst mois  = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];\n\nlet lines = ['📅 *PROCHAINS RDV KOOKII CLEAN*', ''];\n\nfor (let i = 0; i < pages.length; i++) {\n  const p = pages[i].properties || {};\n  const nom      = p['Nom']?.title?.[0]?.plain_text || 'Client';\n  const dateStr  = p['Date RDV']?.date?.start || '';\n  const formule  = p['Formule']?.select?.name || '';\n  const vehicule = p['Véhicule']?.rich_text?.[0]?.plain_text || '';\n  const tel      = p['Téléphone']?.phone_number || '';\n  const adresse  = p['Adresse']?.rich_text?.[0]?.plain_text || '';\n  const devis    = p['DevisNum']?.rich_text?.[0]?.plain_text || '';\n\n  let dateLabel = dateStr;\n  if (dateStr) {\n    const d = new Date(dateStr + 'T12:00:00');\n    dateLabel = jours[d.getDay()] + ' ' + d.getDate() + ' ' + mois[d.getMonth()];\n  }\n\n  lines.push((i + 1) + '. 📆 *' + dateLabel + '*');\n  lines.push('   👤 ' + nom);\n  if (vehicule) lines.push('   🚘 ' + vehicule + (formule ? ' — ' + formule : ''));\n  if (tel)      lines.push('   📞 ' + tel);\n  if (adresse)  lines.push('   📍 ' + adresse);\n  if (devis)    lines.push('   🔖 ' + devis);\n  lines.push('');\n}\n\nreturn [{ json: { message: lines.join('\\n').trim() } }];"
+      },
+      "id": "format-bookings-001",
+      "name": "Formater Liste RDV",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3296,
+        2496
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/message/sendText/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: '33684140438', text: $json.message }) }}",
+        "options": {}
+      },
+      "id": "envoyer-booking-owner-001",
+      "name": "Envoyer Bookings Owner",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3072,
+        2496
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kookiiclean-evolution-api.cvl1v8.easypanel.host/chat/getBase64FromMediaMessage/KookiiClean",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "992036061605-415A-A516-66528AEA5B8E"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ message: $json.messageData }) }}",
+        "options": {}
+      },
+      "id": "get-base64-evolution-001",
+      "name": "Obtenir Base64 Media",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1056,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.base64 || $json.mediaData || '';\nif (!raw) throw new Error('Evolution API na pas retourné de base64 : ' + JSON.stringify($json).slice(0, 200));\n\n// Supprimer le préfixe data:image/...;base64,\nconst base64Data = raw.replace(/^data:[^;]+;base64,/, '');\n\nconst chatId = $('Détecter Contexte Photo').first().json.chatId;\nconst safeId = chatId.replace('@s.whatsapp.net', '').replace(/[^a-z0-9]/gi, '_');\nconst fileName = 'kookii_' + safeId + '_' + Date.now() + '.jpg';\n\nreturn [{\n  json: { fileName, chatId },\n  binary: {\n    data: {\n      data: base64Data,\n      mimeType: 'image/jpeg',\n      fileName: fileName\n    }\n  }\n}];"
+      },
+      "id": "creer-binaire-photo-001",
+      "name": "Créer Fichier Binaire",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "name": "={{ $json.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "id": "upload-drive-photo-001",
+      "name": "Upload Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -368,
+        832
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "vgYK30iGTlarOvOj",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://www.googleapis.com/drive/v3/files/' + $json.id + '/permissions' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"role\": \"reader\", \"type\": \"anyone\" }",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "rendre-public-drive-001",
+      "name": "Rendre Photo Publique",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -144,
+        832
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "vgYK30iGTlarOvOj",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst chatId = $('Détecter Contexte Photo').first().json.chatId;\nconst uploadResult = $('Upload Drive').first().json;\n\n// Log pour debug\nif (!uploadResult.id) {\n  throw new Error('Upload Drive na pas retourné d id : ' + JSON.stringify(uploadResult).slice(0, 300));\n}\n\nconst driveUrl = 'https://drive.google.com/file/d/' + uploadResult.id + '/view';\n\n// Remplace CDN URL par Drive URL permanent\nstaticData['pendingPhotos_' + chatId] = [driveUrl];\n\nreturn [{ json: { chatId, driveUrl } }];"
+      },
+      "id": "stocker-url-drive-001",
+      "name": "Stocker URL Drive",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://novaflows-core-n8n.cvl1v8.easypanel.host/api/v1/workflows/WGAFZ4dHqrCt2K5Z",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZjc5YzczNC0yOWE2LTRjNTQtYmRkYi05MGRiOWFlOGZmNjEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzc2NjM1MTc0fQ.5VxRFrkm7SHQoGegnTE2ts-cylgV4nvd7o-cP-fFTOY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "debounce-read-001",
+      "name": "Debounce Read",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -3696,
+        1136
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const WINDOW_MS = 5000;\nconst triggerJson = $('WhatsApp Trigger').first().json;\nconst storeWf = $json; // Réponse GET du workflow store\nconst body = triggerJson.body || {};\nconst data = body.data || {};\nconst chatId = data.key?.remoteJid || 'unknown';\nconst isFromMe = data.key?.fromMe;\nconst now = Date.now();\n\nconst sd = (storeWf.staticData && storeWf.staticData.global) ? { ...storeWf.staticData.global } : {};\nconst queueKey = 'dbq_' + chatId;\n\n// Prépare le body PUT pour le workflow store (minimal, pas de nodes)\nfunction makeStorePut(newSd) {\n  return {\n    name: storeWf.name,\n    nodes: storeWf.nodes || [],\n    connections: storeWf.connections || {},\n    settings: storeWf.settings || {},\n    staticData: { global: newSd }\n  };\n}\n\nif (isFromMe) {\n  sd['lastBotResp_' + chatId] = now;\n  return [{ json: { ...triggerJson, _proceed: false, _debounceChatId: chatId, _storePut: makeStorePut(sd) } }];\n}\n\nconst msg = data.message;\nconst isPhoto = !!(msg?.imageMessage);\nconst text = isPhoto ? '' : (msg?.conversation || msg?.extendedTextMessage?.text || '');\nconst msgId = data.key?.id || ('gen_' + now);\nconst existing = sd[queueKey];\n\n// Photos : bypass du debounce, chaque photo passe directement\nif (isPhoto) {\n  return [{ json: { ...triggerJson, _proceed: true, _debounceChatId: chatId, _isPhoto: true, _storePut: makeStorePut(sd) } }];\n}\n\nif (existing && existing.until > now) {\n  existing.items.push({ text, isPhoto, ts: now, id: msgId });\n  sd[queueKey] = existing;\n  return [{ json: { ...triggerJson, _proceed: false, _debounceChatId: chatId, _storePut: makeStorePut(sd) } }];\n}\n\nconst sinceTs = sd['lastBotResp_' + chatId] || 0;\nsd[queueKey] = { items: [{ text, isPhoto, ts: now, id: msgId }], sinceTs, until: now + WINDOW_MS };\nreturn [{ json: { ...triggerJson, _proceed: true, _debounceChatId: chatId, _isPhoto: isPhoto, _storePut: makeStorePut(sd) } }];"
+      },
+      "id": "debounce-init-001",
+      "name": "Debounce Init",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3456,
+        1136
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://novaflows-core-n8n.cvl1v8.easypanel.host/api/v1/workflows/WGAFZ4dHqrCt2K5Z",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZjc5YzczNC0yOWE2LTRjNTQtYmRkYi05MGRiOWFlOGZmNjEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzc2NjM1MTc0fQ.5VxRFrkm7SHQoGegnTE2ts-cylgV4nvd7o-cP-fFTOY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json._storePut }}",
+        "options": {}
+      },
+      "id": "debounce-write-001",
+      "name": "Debounce Write",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -3200,
+        1136
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "proceed",
+              "leftValue": "={{ $('Debounce Init').first().json._proceed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "debounce-if-001",
+      "name": "Dernier Message?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2944,
+        1136
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "debounce-wait-001",
+      "name": "Wait Debounce",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2704,
+        1056
+      ],
+      "webhookId": "d26a50b8-589e-401a-9afc-a2b72ab8fa9d"
+    },
+    {
+      "parameters": {
+        "url": "https://novaflows-core-n8n.cvl1v8.easypanel.host/api/v1/workflows/WGAFZ4dHqrCt2K5Z",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZjc5YzczNC0yOWE2LTRjNTQtYmRkYi05MGRiOWFlOGZmNjEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzc2NjM1MTc0fQ.5VxRFrkm7SHQoGegnTE2ts-cylgV4nvd7o-cP-fFTOY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "debounce-read2-001",
+      "name": "Debounce Read 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -2448,
+        1056
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const initJson = $('Debounce Init').first().json;\nconst storeWf = $json; // Store frais depuis 2ème GET\nconst chatId = initJson._debounceChatId;\nconst queueKey = 'dbq_' + chatId;\nconst sd = (storeWf.staticData && storeWf.staticData.global) ? { ...storeWf.staticData.global } : {};\nconst queue = sd[queueKey];\ndelete sd[queueKey];\n\nif (!queue || !queue.items?.length) {\n  return [{ json: { ...initJson, _isLatest: false } }];\n}\nif (initJson._isPhoto) {\n  return [{ json: { ...initJson, _isLatest: true } }];\n}\n\nconst texts = queue.items.sort((a, b) => a.ts - b.ts).map(m => m.text).filter(t => t);\nconst combined = texts.join('\\n').trim();\nlet patchedJson = { ...initJson };\nif (combined) {\n  patchedJson = {\n    ...initJson,\n    body: { ...initJson.body, data: { ...initJson.body.data, message: { ...initJson.body.data.message, conversation: combined } } }\n  };\n}\nreturn [{ json: { ...patchedJson, _isLatest: true, _msgCount: texts.length } }];"
+      },
+      "id": "debounce-check-001",
+      "name": "Debounce Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2208,
+        1056
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "is-latest",
+              "leftValue": "={{ $json._isLatest }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "debounce-latest-001",
+      "name": "Latest?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1952,
+        1056
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "not-group",
+              "leftValue": "={{ $json.body.data.key.remoteJid }}",
+              "rightValue": "@g.us",
+              "operator": {
+                "type": "string",
+                "operation": "notEndsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-groupes-001",
+      "name": "Message Privé?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3952,
+        1136
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Lire Token StaticData": {
+      "main": [
+        [
+          {
+            "node": "Token Configuré?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraire Données Photo": {
+      "main": [
+        [
+          {
+            "node": "Lire Token StaticData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Photo ou Texte?": {
+      "main": [
+        [
+          {
+            "node": "Détecter Contexte Photo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extraire Données Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supprimer RDV Calendar": {
+      "main": [
+        [
+          {
+            "node": "Confirmer Annulation RDV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pr��parer Annulation RDV": {
+      "main": [
+        [
+          {
+            "node": "Supprimer RDV Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Annuler un RDV?": {
+      "main": [
+        [
+          {
+            "node": "Préparer Annulation RDV",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Confirmer Annulation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyser Dispo Immédiate": {
+      "main": [
+        [
+          {
+            "node": "Conflit Immédiat?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vérif Dispo Immédiate": {
+      "main": [
+        [
+          {
+            "node": "Analyser Dispo Immédiate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer Vérif Immédiate": {
+      "main": [
+        [
+          {
+            "node": "Vérif Dispo Immédiate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conflit Immédiat?": {
+      "main": [
+        [
+          {
+            "node": "Demander Photos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gérer Conflit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire Formules": {
+      "main": [
+        [
+          {
+            "node": "Récupérer Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message Privé?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gérer Conflit": {
+      "main": [
+        [
+          {
+            "node": "Creneau Deja Pris",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creneau OK?": {
+      "main": [
+        [
+          {
+            "node": "Créer Événement Calendrier",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gérer Conflit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifier Dispo": {
+      "main": [
+        [
+          {
+            "node": "Analyser Dispo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyser Dispo": {
+      "main": [
+        [
+          {
+            "node": "Creneau OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Récupérer Agenda": {
+      "main": [
+        [
+          {
+            "node": "Préparer Contexte Dates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supprimer Événement Calendrier": {
+      "main": [
+        [
+          {
+            "node": "Confirmer Annulation Calendrier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer Suppression": {
+      "main": [
+        [
+          {
+            "node": "Supprimer Événement Calendrier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Annulation Demandée?": {
+      "main": [
+        [
+          {
+            "node": "Chercher Événement Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Sauvegarder ID Cal": {
+      "main": [
+        [
+          {
+            "node": "Confirmer RDV Client",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Préparer Entrée CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Créer Événement Calendrier": {
+      "main": [
+        [
+          {
+            "node": "Sauvegarder ID Cal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Récupérer Booking + Préparer Cal": {
+      "main": [
+        [
+          {
+            "node": "Verifier Dispo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accepté ou Refusé?": {
+      "main": [
+        [
+          {
+            "node": "Préparer Devis Patron",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Annuler un RDV?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraire Données Callback": {
+      "main": [
+        [
+          {
+            "node": "Détecter Phase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer Récap": {
+      "main": [
+        [
+          {
+            "node": "Envoyer Récap + Boutons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RDV Prêt?": {
+      "main": [
+        [
+          {
+            "node": "Préparer Vérif Immédiate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Envoyer Réponse Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envoyer Réponse Agent": {
+      "main": [
+        [
+          {
+            "node": "Récap Direct?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Détecter et Stocker RDV": {
+      "main": [
+        [
+          {
+            "node": "RDV Prêt?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraire Données Message": {
+      "main": [
+        [
+          {
+            "node": "Lire Formules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route: Message ou Callback?": {
+      "main": [
+        [
+          {
+            "node": "Extraire Données Callback",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Photo ou Texte?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer Contexte Dates": {
+      "main": [
+        [
+          {
+            "node": "Agent IA Kookii Clean",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent IA Kookii Clean": {
+      "main": [
+        [
+          {
+            "node": "Détecter et Stocker RDV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Token Configuré?": {
+      "main": [
+        [
+          {
+            "node": "Obtenir Infos Photo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Demander Config Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtenir Infos Photo": {
+      "main": [
+        [
+          {
+            "node": "Préparer URL Vision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer URL Vision": {
+      "main": [
+        [
+          {
+            "node": "Analyser Photo Véhicule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyser Photo Véhicule": {
+      "main": [
+        [
+          {
+            "node": "Traiter Analyse Photo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Traiter Analyse Photo": {
+      "main": [
+        [
+          {
+            "node": "Envoyer Analyse Photo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mémoire Conversation": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agent IA Kookii Clean",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vérifier Disponibilité": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agent IA Kookii Clean",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent IA Kookii Clean",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmer RDV Client": {
+      "main": [
+        [
+          {
+            "node": "Notifier Owner Accept",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer Devis Patron": {
+      "main": [
+        [
+          {
+            "node": "Envoyer Devis Patron",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Détecter Phase": {
+      "main": [
+        [
+          {
+            "node": "Phase Devis?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Phase Devis?": {
+      "main": [
+        [
+          {
+            "node": "Accepté/Refusé Devis?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Accepté ou Refusé?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer Réponse Devis": {
+      "main": [
+        [
+          {
+            "node": "Envoyer Réponse Devis Client",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Préparer Refus CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envoyer Réponse Devis Client": {
+      "main": [
+        [
+          {
+            "node": "Notifier Owner Réponse Devis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accepté/Refusé Devis?": {
+      "main": [
+        [
+          {
+            "node": "Récupérer Messages Client",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Préparer Réponse Devis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Détecter Contexte Photo": {
+      "main": [
+        [
+          {
+            "node": "Photo Booking?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Photo Booking?": {
+      "main": [
+        [
+          {
+            "node": "Obtenir Base64 Media",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extraire Données Photo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Récupérer Messages Client": {
+      "main": [
+        [
+          {
+            "node": "Extraire Prix Devis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraire Prix Devis": {
+      "main": [
+        [
+          {
+            "node": "Récupérer Booking + Préparer Cal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Route: Message ou Callback?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Envoyer Photo Reçue": {
+      "main": [
+        [
+          {
+            "node": "Passer Info Photo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Passer Info Photo": {
+      "main": [
+        [
+          {
+            "node": "Préparer Récap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Récap Direct?": {
+      "main": [
+        [
+          {
+            "node": "Passer Info État",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Annulation Demandée?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Passer Info État": {
+      "main": [
+        [
+          {
+            "node": "Préparer Récap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chercher Événement Cancel": {
+      "main": [
+        [
+          {
+            "node": "Préparer Suppression",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Requêter Notion CRM": {
+      "main": [
+        [
+          {
+            "node": "Calculer Stats CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculer Stats CRM": {
+      "main": [
+        [
+          {
+            "node": "Envoyer Stats Owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer Entrée CRM": {
+      "main": [
+        [
+          {
+            "node": "Enregistrer dans CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer Refus CRM": {
+      "main": [
+        [
+          {
+            "node": "Enregistrer Refus CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmer Annulation Calendrier": {
+      "main": [
+        [
+          {
+            "node": "Chercher Entrée CRM Annulation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chercher Entrée CRM Annulation": {
+      "main": [
+        [
+          {
+            "node": "Décider Annulation CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Décider Annulation CRM": {
+      "main": [
+        [
+          {
+            "node": "Enregistrer Annulation CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Requêter Bookings Notion": {
+      "main": [
+        [
+          {
+            "node": "Formater Liste RDV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formater Liste RDV": {
+      "main": [
+        [
+          {
+            "node": "Envoyer Bookings Owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Drive": {
+      "main": [
+        [
+          {
+            "node": "Rendre Photo Publique",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rendre Photo Publique": {
+      "main": [
+        [
+          {
+            "node": "Stocker URL Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stocker URL Drive": {
+      "main": [
+        [
+          {
+            "node": "Envoyer Photo Reçue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtenir Base64 Media": {
+      "main": [
+        [
+          {
+            "node": "Créer Fichier Binaire",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Créer Fichier Binaire": {
+      "main": [
+        [
+          {
+            "node": "Upload Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Debounce Init": {
+      "main": [
+        [
+          {
+            "node": "Debounce Write",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Debounce": {
+      "main": [
+        [
+          {
+            "node": "Debounce Read 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Debounce Check": {
+      "main": [
+        [
+          {
+            "node": "Latest?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dernier Message?": {
+      "main": [
+        [
+          {
+            "node": "Wait Debounce",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Debounce Read": {
+      "main": [
+        [
+          {
+            "node": "Debounce Init",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Debounce Write": {
+      "main": [
+        [
+          {
+            "node": "Dernier Message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Debounce Read 2": {
+      "main": [
+        [
+          {
+            "node": "Debounce Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Latest?": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Message Privé?": {
+      "main": [
+        [
+          {
+            "node": "Debounce Read",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "",
+    "availableInMCP": false,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true
+  },
+  "versionId": "9192fd59-31d5-4d5b-bd19-1fa2662f80bb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6cfaacaf2b9b5cd14029c8c66ef7273bf49dc528c91f5364e9f7d93aefed7d5b"
+  },
+  "id": "21VOX7IzmTTPK11v",
+  "tags": []
+}
